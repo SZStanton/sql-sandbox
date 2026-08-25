@@ -1,5 +1,5 @@
 {
-  "name": "sql-playground",
+  "name": "sql-sandbox",
   "private": true,
   "type": "module",
   "workspaces": [
