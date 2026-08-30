@@ -1,5 +1,5 @@
 {
-  "name": "sql-playground",
+  "name": "sql-sandbox",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -31,6 +31,26 @@
     "format:check": "prettier --check ."
   },
   "devDependencies": {
-    "concurrently": "^10.0.5"
+    "@eslint/js": "^10.0.1",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.6",
+    "concurrently": "^10.0.5",
+    "eslint": "^10.9.1",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.4",
+    "globals": "^17.11.0",
+    "jsdom": "^30.0.1",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.68.0",
+    "vitest": "^4.1.11"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "msgpackr-extract@3.0.4": true,
+    "workerd@1.20260704.1": true,
+    "@prisma/engines@7.10.0": true,
+    "prisma@7.10.0": true
   }
 }
