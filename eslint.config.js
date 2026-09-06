@@ -1,69 +1,31 @@
-// Install at the ROOT, not inside client or server:
-//   npm i -D eslint @eslint/js globals eslint-plugin-react-hooks
-//   npm i -D eslint-plugin-react-refresh prettier typescript-eslint
+// Install at the ROOT:
+//   npm i next react react-dom pg recharts motion @phosphor-icons/react
+//   npm i -D typescript @types/node @types/react @types/react-dom @types/pg tailwindcss @tailwindcss/postcss eslint eslint-config-next prettier tsx vitest jsdom @testing-library/react @testing-library/jest-dom @testing-library/user-event
 
-import js from '@eslint/js';
-import globals from 'globals';
-import reactHooks from 'eslint-plugin-react-hooks';
-import reactRefresh from 'eslint-plugin-react-refresh';
-import tseslint from 'typescript-eslint';
 import { defineConfig, globalIgnores } from 'eslint/config';
-
-// The base rule double-reports on TS, so the TS one does the work.
-const unusedVars = {
-  'no-unused-vars': 'off',
-  '@typescript-eslint/no-unused-vars': [
-    'error',
-    { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
-  ],
-};
+import nextVitals from 'eslint-config-next/core-web-vitals';
+import nextTs from 'eslint-config-next/typescript';
 
 export default defineConfig([
+  ...nextVitals,
+  ...nextTs,
+
   globalIgnores([
-    '**/dist',
-    '**/build',
-    '**/coverage',
-    '**/.vite',
-    '**/generated',
-    '.claude',
+    '.next/**',
+    'out/**',
+    'build/**',
+    'coverage/**',
+    'next-env.d.ts',
   ]),
 
-  // Frontend, browser globals and the React rules.
   {
-    files: ['client/**/*.{ts,tsx}'],
-    extends: [
-      js.configs.recommended,
-      tseslint.configs.recommended,
-      reactHooks.configs.flat.recommended,
-      reactRefresh.configs.vite,
-    ],
-    languageOptions: {
-      globals: globals.browser,
-      parserOptions: { ecmaFeatures: { jsx: true } },
-    },
-    rules: unusedVars,
-  },
-
-  // Backend, node globals and no React rules.
-  {
-    files: ['server/**/*.ts'],
-    extends: [js.configs.recommended, tseslint.configs.recommended],
-    languageOptions: {
-      globals: globals.node,
-      sourceType: 'module',
-    },
-    // Express counts four arguments to spot an error handler, so the unused
-    // trailing next has to stay. The underscore marks it deliberate.
-    rules: unusedVars,
-  },
-
-  // Config files at the root, which run in node.
-  {
-    files: ['*.{js,ts}'],
-    extends: [js.configs.recommended],
-    languageOptions: {
-      globals: globals.node,
-      sourceType: 'module',
+    rules: {
+      // Underscore marks a binding that is deliberately unused, such as a key
+      // peeled off an object by destructuring.
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
     },
   },
 ]);
