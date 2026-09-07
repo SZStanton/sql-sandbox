@@ -17,7 +17,8 @@
     "test:watch": "vitest",
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
-    "db:migrate": "tsx db/migrate.ts"
+    "db:migrate": "tsx db/migrate.ts",
+    "db:provision": "tsx db/provision.ts"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
