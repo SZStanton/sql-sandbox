@@ -2,55 +2,53 @@
   "name": "sql-sandbox",
   "private": true,
   "type": "module",
-  "workspaces": [
-    "client",
-    "server"
-  ],
   "engines": {
     "node": "24.x"
   },
   "scripts": {
-    "db:up": "docker compose up -d",
-    "db:down": "docker compose down",
-    "dev": "concurrently -n server,client -c blue,magenta \"npm run dev -w server\" \"npm run dev -w client\"",
-    "dev:client": "npm run dev -w client",
-    "dev:server": "npm run dev -w server",
-    "build": "npm run build -w client",
-    "start": "npm start -w server",
-    "prisma:generate": "npm run prisma:generate -w server",
-    "prisma:migrate": "npm run prisma:migrate -w server",
-    "prisma:deploy": "npm run prisma:deploy -w server",
-    "prisma:seed": "npm run prisma:seed -w server",
-    "sandbox:provision": "npm run sandbox:provision -w server",
-    "prisma:studio": "npm run prisma:studio -w server",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "npm run typecheck -w client && npm run typecheck -w server",
-    "lint": "eslint .",
-    "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:migrate": "tsx db/migrate.ts",
+    "db:provision": "tsx db/provision.ts"
+  },
+  "dependencies": {
+    "@phosphor-icons/react": "^2.1.10",
+    "motion": "^13.2.0",
+    "next": "^16.3.4",
+    "pg": "^8.23.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "recharts": "^3.10.1"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
+    "@tailwindcss/postcss": "^4.3.3",
     "@testing-library/jest-dom": "^7.0.1",
-    "@testing-library/react": "^16.3.2",
-    "@testing-library/user-event": "^14.6.6",
-    "concurrently": "^10.0.5",
-    "eslint": "^10.9.1",
-    "eslint-plugin-react-hooks": "^7.1.1",
-    "eslint-plugin-react-refresh": "^0.5.4",
-    "globals": "^17.11.0",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
+    "@types/node": "^26.4.1",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.3.4",
     "jsdom": "^30.0.1",
     "prettier": "^3.9.6",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.68.0",
-    "vitest": "^4.1.11"
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.13",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.0"
   },
   "allowScripts": {
     "esbuild@0.28.2": true,
-    "msgpackr-extract@3.0.4": true,
-    "workerd@1.20260704.1": true,
-    "@prisma/engines@7.10.0": true,
-    "prisma@7.10.0": true
+    "unrs-resolver@1.12.2": true
   }
 }

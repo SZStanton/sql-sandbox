@@ -1,4 +1,4 @@
-# ---- Node / Vite ----
+# ---- Node ----
 node_modules/
 dist/
 dist-ssr/
@@ -6,6 +6,9 @@ build/
 coverage/
 *.tsbuildinfo
 .vite/
+.next/
+out/
+next-env.d.ts
 
 # ---- Prisma ----
 # Only if the Prisma generator is given an explicit output path. Migrations are
@@ -39,15 +42,9 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# ---- Claude Code: local context, never committed ----
-# CLAUDE.md and reference/ hold notes and personal details that stay on my
-# machine. Check these are here before the first commit on any project, and
-# again after anything that edits this file.
+# ---- Claude Code: local context ----
 CLAUDE.md
 .claude/
 reference/
-- SQL Setup Guide/
-
-# Agent skill files, same reason as .claude: tooling, not the project
 .agents/
 skills-lock.json
