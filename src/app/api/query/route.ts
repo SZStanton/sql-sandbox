@@ -1,34 +1,55 @@
 import { NextResponse } from 'next/server';
 import { runInSandbox } from '@/lib/runInSandbox';
+import { getQuery } from '@/queries/manifest';
 
 // pg needs TCP sockets, which the edge runtime doesn't have.
 export const runtime = 'nodejs';
 
-// Hardcoded until the manifest lands in step 3.
-const DEMO_SQL = `SELECT department,
-        count(*) AS headcount,
-        round(avg(salary), 2) AS avg_salary
-FROM users
-WHERE department IS NOT NULL
-GROUP BY department
-ORDER BY headcount DESC`;
+// Hardcoded until the claim endpoint lands in step 4.
+const SANDBOX = 'demo_1';
 
-export async function POST() {
-  const startedAT = performance.now();
+export async function POST(request: Request) {
+  const startedAt = performance.now();
+
+  // A malformed body is the caller's mistake, so 400 rather than 500.
+  let body: { id?: unknown };
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: 'Expected a JSON body.' },
+      { status: 400 },
+    );
+  }
+
+  const { id } = body;
+  if (typeof id !== 'string') {
+    return NextResponse.json({ error: 'Expected an id.' }, { status: 400 });
+  }
+
+  // An id that isn't in the manifest can never reach the database.
+  const entry = getQuery(id);
+  if (!entry) {
+    return NextResponse.json({ error: 'Unknown query.' }, { status: 404 });
+  }
 
   try {
     const result = await runInSandbox({
-      schema: 'demo_1',
-      sql: DEMO_SQL,
-      mutates: false,
+      schema: SANDBOX,
+      sql: entry.sql,
+      mutates: entry.mutates,
     });
 
-    // The SQL comes from here, not the browser, so the code panel can't lie.
+    // Everything shown to the visitor comes from here, never from the request.
     return NextResponse.json({
+      id: entry.id,
+      title: entry.title,
+      note: entry.note,
+      sql: entry.sql,
+      chart: entry.chart ?? null,
       rows: result.rows,
       rowCount: result.rowCount,
-      sql: DEMO_SQL,
-      durationMs: Math.round(performance.now() - startedAT),
+      durationMs: Math.round(performance.now() - startedAt),
     });
   } catch (error) {
     // A Postgres error can name the schema, so only the log sees it.
