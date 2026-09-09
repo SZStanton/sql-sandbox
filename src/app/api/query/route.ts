@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { runInSandbox } from '@/lib/runInSandbox';
 import { getQuery } from '@/queries/manifest';
+import { serialise, shapeError } from '@/lib/serialise';
 
 // pg needs TCP sockets, which the edge runtime doesn't have.
 export const runtime = 'nodejs';
@@ -47,13 +48,15 @@ export async function POST(request: Request) {
       note: entry.note,
       sql: entry.sql,
       chart: entry.chart ?? null,
-      rows: result.rows,
-      rowCount: result.rowCount,
+      ...serialise(result),
       durationMs: Math.round(performance.now() - startedAt),
     });
   } catch (error) {
-    // A Postgres error can name the schema, so only the log sees it.
+    // A failed query is often the lesson, so the message goes back redacted.
     console.error(error);
-    return NextResponse.json({ error: 'Query failed.' }, { status: 500 });
+    return NextResponse.json(
+      { error: shapeError(error), sql: entry.sql },
+      { status: 400 },
+    );
   }
 }
