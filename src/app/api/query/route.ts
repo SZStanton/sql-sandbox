@@ -6,6 +6,9 @@ import { serialise, shapeError } from '@/lib/serialise';
 // pg needs TCP sockets, which the edge runtime doesn't have.
 export const runtime = 'nodejs';
 
+// Frankfurt, matching the Neon region. A mismatch adds a round trip per query.
+export const preferredRegion = 'fra1';
+
 // Hardcoded until the claim endpoint lands in step 4.
 const SANDBOX = 'demo_1';
 
