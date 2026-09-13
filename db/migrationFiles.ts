@@ -10,7 +10,7 @@ export type Migration = {
   checksum: string;
 };
 
-const FILENAME = /^(\d{3})_([a-z0-9-]+)\.sql$/;
+const FILENAME = /^(\d{3})_([a-z0-9_-]+)\.sql$/;
 
 export function readMigrations(dir: string): Migration[] {
   const files = readdirSync(dir)

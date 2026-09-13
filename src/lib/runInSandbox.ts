@@ -6,11 +6,19 @@ import { assertKnownSchema } from '@/lib/sandbox/schemas';
 const STATEMENT_TIMEOUT = '5s';
 
 type RunOptions = {
-  schema: string;
+  token: string;
   sql: string;
   params?: unknown[];
   mutates: boolean;
 };
+
+// Thrown when the cookie's token no longer matches a sandbox.
+export class SandboxExpiredError extends Error {
+  constructor() {
+    super('Sandbox expired.');
+    this.name = 'SandboxExpiredError';
+  }
+}
 
 // One round trip instead of three. Every one is transaction scoped.
 const SESSION_SETUP = `
@@ -21,15 +29,28 @@ const SESSION_SETUP = `
 export async function runInSandbox<T extends QueryResultRow>(
   options: RunOptions,
 ): Promise<QueryResult<T>> {
-  const { schema, sql, params = [], mutates } = options;
-  assertKnownSchema(schema);
+  const { token, sql, params = [], mutates } = options;
 
   const client = await appPool.connect();
 
   try {
     await client.query('BEGIN');
 
-    // Postgres refuses the write, so the manifest flag isn't just documentation.
+    // Validates the token and marks the visitor active, in one round trip.
+    const session = await client.query<{ schema: string | null }>(
+      'SELECT public.begin_sandbox_session($1) AS schema',
+      [token],
+    );
+
+    const schema = session.rows[0]?.schema;
+    if (!schema) {
+      throw new SandboxExpiredError();
+    }
+
+    // Belt and braces. The function should only ever return a known schema.
+    assertKnownSchema(schema);
+
+    // Goes after the session touch, which is itself a write.
     if (!mutates) {
       await client.query('SET TRANSACTION READ ONLY');
     }
