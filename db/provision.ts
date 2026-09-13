@@ -53,6 +53,15 @@ async function provisionSchema(
     await client.query(`DROP SCHEMA IF EXISTS ${name} CASCADE`);
     await client.query(`CREATE SCHEMA ${name}`);
 
+    // Provisioning wipes the schema, so any visitor holding it is evicted.
+    await client.query(
+      `INSERT INTO public.sandboxes (schema_name)
+      VALUES ($1)
+      ON CONFLICT (schema_name) DO UPDATE
+      SET token = NULL, claimed_at = NULL, last_seen_at = NULL`,
+      [schema],
+    );
+
     // Granted by the schema owner, so it has to happen before the role switch.
     await client.query(`GRANT USAGE, CREATE ON SCHEMA ${name} TO ${grantee}`);
 
