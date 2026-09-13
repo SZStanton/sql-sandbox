@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import { runInSandbox } from '@/lib/runInSandbox';
+import { NextResponse, type NextRequest } from 'next/server';
+import { runInSandbox, SandboxExpiredError } from '@/lib/runInSandbox';
 import { getQuery } from '@/queries/manifest';
 import { serialise, shapeError } from '@/lib/serialise';
 
@@ -9,11 +9,12 @@ export const runtime = 'nodejs';
 // Frankfurt, matching the Neon region. A mismatch adds a round trip per query.
 export const preferredRegion = 'fra1';
 
-// Hardcoded until the claim endpoint lands in step 4.
-const SANDBOX = 'demo_1';
-
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   const startedAt = performance.now();
+  const token = request.cookies.get('sandbox')?.value;
+  if (!token) {
+    return NextResponse.json({ error: 'No sandbox yet.' }, { status: 401 });
+  }
 
   // A malformed body is the caller's mistake, so 400 rather than 500.
   let body: { id?: unknown };
@@ -39,7 +40,7 @@ export async function POST(request: Request) {
 
   try {
     const result = await runInSandbox({
-      schema: SANDBOX,
+      token,
       sql: entry.sql,
       mutates: entry.mutates,
     });
@@ -55,6 +56,13 @@ export async function POST(request: Request) {
       durationMs: Math.round(performance.now() - startedAt),
     });
   } catch (error) {
+    if (error instanceof SandboxExpiredError) {
+      return NextResponse.json(
+        { error: 'Your sandbox expired. Start a new one.' },
+        { status: 401 },
+      );
+    }
+
     // A failed query is often the lesson, so the message goes back redacted.
     console.error(error);
     return NextResponse.json(
